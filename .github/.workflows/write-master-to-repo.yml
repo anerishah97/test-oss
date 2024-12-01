@@ -1,0 +1,22 @@
+name: Sync master to repo
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  sync-to-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to destination repository
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.WITH_TEST_OSS }}
+        run: |
+          git remote add destination https://$API_TOKEN_GITHUB@github.com/anerishah97/test-oss-destination.git
+          git push destination master:master --force
