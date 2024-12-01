@@ -16,7 +16,23 @@ jobs:
 
       - name: Push to destination repository
         env:
-          API_TOKEN_GITHUB: ${{ secrets.WITH_TEST_OSS }}
+          GITHUB_TOKEN: ${{ secrets.WITH_TEST_OSS }}
         run: |
-          git remote add destination https://x-access-token:${API_TOKEN_GITHUB}@github.com/anerishah97/test-oss-destination.git
-          git push destination main:main --force
+          echo "1. Setting up git configuration..."
+          git config --global user.email "$(git log -1 --pretty=format:'%ae')"
+          git config --global user.name "$(git log -1 --pretty=format:'%an')"
+          
+          echo "2. Checking current remotes..."
+          git remote -v
+          
+          echo "3. Adding destination remote..."
+          git remote add destination "https://${GITHUB_TOKEN}@github.com/anerishah97/test-oss-destination.git"
+          
+          echo "4. Verifying remotes after addition..."
+          git remote -v
+          
+          echo "5. Checking current branch..."
+          git branch --show-current
+          
+          echo "6. Attempting to push..."
+          git push destination main:main --force -v
