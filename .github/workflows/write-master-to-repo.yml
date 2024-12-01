@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 'pr/**'
 
 jobs:
   sync-to-repo:
@@ -11,14 +12,20 @@ jobs:
     steps:
       - name: Checkout source repository
         uses: actions/checkout@v4
-        
-      - name: Push directory to another repository
-        uses: cpina/github-action-push-to-another-repository@main
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.WITH_TEST_OSS }}
         with:
-          source-directory: '.'
-          destination-github-username: 'anerishah97'
-          destination-repository-name: 'test-oss-destination'
-          user-email: anerishah97@gmail.com
-          target-branch: main
+          fetch-depth: 0
+
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Add known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Push to destination repository
+        run: |
+          git remote add destination git@github.com:anerishah97/test-oss-destination.git
+          git push destination ${GITHUB_REF_NAME}:${GITHUB_REF_NAME} --force
