@@ -3,7 +3,7 @@ name: Sync master to repo
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   sync-to-repo:
@@ -19,4 +19,4 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.WITH_TEST_OSS }}
         run: |
           git remote add destination https://$API_TOKEN_GITHUB@github.com/anerishah97/test-oss-destination.git
-          git push destination master:master --force
+          git push destination main:main --force
