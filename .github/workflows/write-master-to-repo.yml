@@ -11,13 +11,14 @@ jobs:
     steps:
       - name: Checkout source repository
         uses: actions/checkout@v4
+        
+      - name: Push directory to another repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.WITH_TEST_OSS }}
         with:
-          fetch-depth: 0
-          
-      - name: Push to destination repository
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.WITH_TEST_OSS }}
-          repository: anerishah97/test-oss-destination
-          branch: main
-          force: true
+          source-directory: '.'
+          destination-github-username: 'anerishah97'
+          destination-repository-name: 'test-oss-destination'
+          user-email: anerishah97@gmail.com
+          target-branch: main
