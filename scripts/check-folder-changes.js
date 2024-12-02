@@ -79,6 +79,11 @@ function pushChanges(files) {
         const tempBranch = `temp-branch-${Date.now()}`;
         console.log('Debug: Creating temp branch:', tempBranch);
         execSync('git checkout --orphan ' + tempBranch);
+        
+        // Set up Git configuration
+        execSync('git config user.name "GitHub Actions Bot"');
+        execSync('git config user.email "actions@github.com"');
+        
         execSync('git rm -rf .');
         
         // Copy files back from temp directory
