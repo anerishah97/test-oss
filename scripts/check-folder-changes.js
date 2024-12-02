@@ -1,6 +1,6 @@
-import { execSync } from 'child_process';
-import path from 'path';
-import { Octokit } from '@octokit/rest';
+const { execSync } = require('child_process');
+const path = require('path');
+const { Octokit } = require('@octokit/rest');
 
 // Define the path constant
 const PATH_TO_CHECK = 'folder-to-commit';
