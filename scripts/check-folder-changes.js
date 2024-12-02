@@ -116,7 +116,6 @@ async function main() {
         process.env.HEAD_COMMIT
     );
 
-    console.log('Debug: Files:', files);    
     const hasChanges = files.length > 0;
     console.log('Has changes in path:', hasChanges);
 
