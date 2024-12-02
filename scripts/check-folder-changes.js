@@ -49,14 +49,19 @@ function pushChanges(files) {
     }
 
     try {
-        console.log('Debug: Files to process:', files);  // Debug log for files array
         // Filter files to only include those starting with PATH_TO_CHECK
         const filteredFiles = files.filter(file => file.filename.startsWith(PATH_TO_CHECK));
-        console.log('Debug: Files to process:', filteredFiles);  // Debug log for filtered files array
+        const filenames = filteredFiles.map(file => file.filename);
+        console.log('Debug: Filenames to process:', filenames);
         
         const commitMsg = execSync('git log -1 --pretty=%B').toString().trim();
         const branchName = process.env.GITHUB_REF_NAME || 'main';
 
+        // Fetch the repository first to ensure we have the files
+        console.log('Debug: Fetching repository');
+        execSync('git fetch origin');
+        execSync(`git checkout ${process.env.HEAD_COMMIT}`);
+        
         const tempBranch = `temp-branch-${Date.now()}`;
         console.log('Debug: Creating temp branch:', tempBranch);
         execSync('git checkout --orphan ' + tempBranch);
