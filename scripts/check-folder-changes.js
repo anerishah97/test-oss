@@ -85,8 +85,8 @@ async function main() {
 
     // Debugging: Log environment variables
     console.log('Debug: Environment Variables:', {
-        GITHUB_BASE_REF: process.env.GITHUB_BASE_REF,
-        GITHUB_HEAD_REF: process.env.GITHUB_HEAD_REF
+        BASE_COMMIT: process.env.BASE_COMMIT,
+        HEAD_COMMIT: process.env.HEAD_COMMIT
     });
 
     // Parse repository information
@@ -97,8 +97,8 @@ async function main() {
         octokit,
         owner,
         repo,
-        process.env.GITHUB_BASE_REF,
-        process.env.GITHUB_HEAD_REF
+        process.env.BASE_COMMIT,
+        process.env.HEAD_COMMIT
     );
     const hasChanges = files.length > 0;
     console.log('Has changes in path:', hasChanges);

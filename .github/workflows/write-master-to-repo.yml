@@ -40,8 +40,6 @@ jobs:
           HEAD_COMMIT=$(git log -1 --pretty=format:'%H')
           echo "INFO: Base commit: $BASE_COMMIT"
           echo "INFO: Head commit: $HEAD_COMMIT"
-          echo "base_ref=$BASE_COMMIT" >> $GITHUB_ENV
-          echo "head_ref=$HEAD_COMMIT" >> $GITHUB_ENV
           echo "BASE_COMMIT=$BASE_COMMIT" >> $GITHUB_ENV
           echo "HEAD_COMMIT=$HEAD_COMMIT" >> $GITHUB_ENV
 
@@ -49,8 +47,6 @@ jobs:
         id: check_changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_BASE_REF: ${{ env.BASE_COMMIT }}
-          GITHUB_HEAD_REF: ${{ env.HEAD_COMMIT }}
         run: node scripts/check-folder-changes.js
 
       - name: Use the output
