@@ -1,5 +1,6 @@
 const { execSync } = require('child_process');
 const path = require('path');
+const { Octokit } = require('@octokit/rest');
 
 // Define the path constant
 const PATH_TO_CHECK = 'folder-to-commit';
@@ -77,12 +78,27 @@ function pushChanges(files) {
 }
 
 // Run the script
-const changedFiles = getChangedFiles();
-const hasChanges = changedFiles.length > 0;
+console.log('Debug: Initializing Octokit');
+const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN
+});
+
+// Parse repository information
+const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+console.log('Debug: Repository info:', { owner, repo });
+
+const files = await getChangedFiles(
+    octokit,
+    owner,
+    repo,
+    process.env.GITHUB_BASE_REF,
+    process.env.GITHUB_HEAD_REF
+);
+const hasChanges = files.length > 0;
 console.log('Has changes in path:', hasChanges);
 
 if (hasChanges) {
-    const pushed = pushChanges(changedFiles);
+    const pushed = pushChanges(files);
     console.log('Changes pushed successfully:', pushed);
 }
 
