@@ -10,6 +10,7 @@ function checkFolderChanges() {
         
         // Split the output into array of changed files
         const changedFiles = diffOutput.split('\n').filter(Boolean);
+        console.log('Changed files:', changedFiles);
         
         // Check if any changed file starts with our path
         const hasChangesInPath = changedFiles.some(file => 
