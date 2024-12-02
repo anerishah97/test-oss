@@ -35,8 +35,15 @@ jobs:
       - name: Determine base and head commits
         id: git_info
         run: |
-          echo "GITHUB_BASE_REF=$(git rev-parse HEAD^)" >> $GITHUB_ENV
-          echo "GITHUB_HEAD_REF=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          echo "Current branch: $(git branch --show-current)"
+          echo "Last commit: $(git log -1 --pretty=format:'%H')"
+          echo "Previous commit: $(git log -2 --pretty=format:'%H' | tail -n 1)"
+          BASE_COMMIT=$(git log -2 --pretty=format:'%H' | tail -n 1)
+          HEAD_COMMIT=$(git log -1 --pretty=format:'%H')
+          echo "GITHUB_BASE_REF=${BASE_COMMIT}" >> $GITHUB_ENV
+          echo "GITHUB_HEAD_REF=${HEAD_COMMIT}" >> $GITHUB_ENV
+          echo "Debug: GITHUB_BASE_REF=${BASE_COMMIT}"
+          echo "Debug: GITHUB_HEAD_REF=${HEAD_COMMIT}"
 
       - name: Check for changes
         id: check_changes
