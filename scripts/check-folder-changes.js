@@ -73,4 +73,4 @@ if (hasChanges) {
 }
 
 // New way
-console.log(`GITHUB_OUTPUT=${hasChanges}` >> $GITHUB_OUTPUT); 
+console.log(`has_changes=${hasChanges}` >> process.env.GITHUB_OUTPUT);
