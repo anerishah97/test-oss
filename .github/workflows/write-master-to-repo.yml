@@ -17,12 +17,10 @@ jobs:
       - name: Checkout source repository
         uses: actions/checkout@v4
         with:
-          # Fetch the full history to allow for accurate diff operations
-          # and to ensure all branches and commit history are available.
           fetch-depth: 0
 
       - name: Install dependencies
-        run: npm install @octokit/rest
+        run: npm install
 
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.8.0
@@ -34,10 +32,18 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
+      - name: Determine base and head commits
+        id: git_info
+        run: |
+          echo "GITHUB_BASE_REF=$(git rev-parse HEAD^)" >> $GITHUB_ENV
+          echo "GITHUB_HEAD_REF=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
       - name: Check for changes
         id: check_changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_BASE_REF: ${{ env.GITHUB_BASE_REF }}
+          GITHUB_HEAD_REF: ${{ env.GITHUB_HEAD_REF }}
         run: node scripts/check-folder-changes.js
 
       - name: Use the output
