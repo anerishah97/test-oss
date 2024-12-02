@@ -10,12 +10,22 @@ jobs:
   sync-to-repo:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
       - name: Checkout source repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Check for changes in folder
+        id: folder_changes
+        run: node scripts/check-folder-changes.js
+
       - name: Install SSH key
+        if: steps.folder_changes.outputs.has_changes == 'true'
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.DEPLOY_KEY }}
