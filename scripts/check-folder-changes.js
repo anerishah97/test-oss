@@ -1,30 +1,76 @@
 const { execSync } = require('child_process');
+const path = require('path');
 
 // Define the path constant
 const PATH_TO_CHECK = 'folder-to-commit';
 
-function checkFolderChanges() {
+function getChangedFiles() {
     try {
-        // Get the list of changed files between HEAD and previous commit. This workflow runs on master, so HEAD^ is the previous commit merged.
-        const diffOutput = execSync('git diff --name-only HEAD^ HEAD').toString();
-        
-        // Split the output into array of changed files
+        const diffOutput = execSync('git diff --name-only origin/main...HEAD').toString();
         const changedFiles = diffOutput.split('\n').filter(Boolean);
-        console.log('Changed files:', changedFiles);
         
-        // Check if any changed file starts with our path
-        const hasChangesInPath = changedFiles.some(file => 
+        // Filter only files from our target directory
+        const targetFiles = changedFiles.filter(file => 
             file.startsWith(PATH_TO_CHECK + '/')
         );
-
-        return hasChangesInPath;
+        
+        console.log('Changed files in target directory:', targetFiles);
+        return targetFiles;
     } catch (error) {
         console.error('Error checking for changes:', error);
-        // In case of error (like first commit), return false
+        return [];
+    }
+}
+
+function pushChanges(files) {
+    if (files.length === 0) {
+        console.log('No changes to push');
+        return false;
+    }
+
+    try {
+        // Get the latest commit message
+        const commitMsg = execSync('git log -1 --pretty=%B').toString().trim();
+        const branchName = process.env.GITHUB_REF_NAME || 'main';
+
+        // Create a temporary branch for our changes
+        const tempBranch = `temp-branch-${Date.now()}`;
+        execSync('git checkout --orphan ' + tempBranch);
+        
+        // Reset the working directory
+        execSync('git rm -rf .');
+        
+        // Copy only the changed files
+        files.forEach(file => {
+            const dir = path.dirname(file);
+            execSync(`mkdir -p "${dir}"`);
+            execSync(`git show HEAD:"${file}" > "${file}"`);
+            execSync(`git add "${file}"`);
+        });
+
+        // Commit the changes with the same commit message
+        execSync(`git commit -m "${commitMsg}"`);
+        
+        // Push to the destination with the same branch name
+        execSync('git remote add destination git@github.com:anerishah97/test-oss-destination.git || true');
+        execSync(`git push -f destination ${tempBranch}:${branchName}`);
+        
+        return true;
+    } catch (error) {
+        console.error('Error pushing changes:', error);
         return false;
     }
 }
 
-// Run the check and output the result in a format GHA can read
-const hasChanges = checkFolderChanges();
-console.log(`::set-output name=has_changes::${hasChanges}`); 
+// Run the script
+const changedFiles = getChangedFiles();
+const hasChanges = changedFiles.length > 0;
+console.log('Has changes in path:', hasChanges);
+
+if (hasChanges) {
+    const pushed = pushChanges(changedFiles);
+    console.log('Changes pushed successfully:', pushed);
+}
+
+// New way
+console.log(`GITHUB_OUTPUT=${hasChanges}` >> $GITHUB_OUTPUT); 
