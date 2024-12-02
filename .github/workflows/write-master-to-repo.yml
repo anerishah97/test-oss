@@ -35,22 +35,19 @@ jobs:
       - name: Determine base and head commits
         id: git_info
         run: |
-          echo "Current branch: $(git branch --show-current)"
-          echo "Last commit: $(git log -1 --pretty=format:'%H')"
-          echo "Previous commit: $(git log -2 --pretty=format:'%H' | tail -n 1)"
           BASE_COMMIT=$(git log -2 --pretty=format:'%H' | tail -n 1)
           HEAD_COMMIT=$(git log -1 --pretty=format:'%H')
-          echo "GITHUB_BASE_REF=${BASE_COMMIT}" >> $GITHUB_ENV
-          echo "GITHUB_HEAD_REF=${HEAD_COMMIT}" >> $GITHUB_ENV
-          echo "Debug: GITHUB_BASE_REF=${BASE_COMMIT}"
-          echo "Debug: GITHUB_HEAD_REF=${HEAD_COMMIT}"
+          echo "base_ref=$BASE_COMMIT" >> $GITHUB_ENV
+          echo "head_ref=$HEAD_COMMIT" >> $GITHUB_ENV
+          echo "BASE_COMMIT=$BASE_COMMIT" >> $GITHUB_ENV
+          echo "HEAD_COMMIT=$HEAD_COMMIT" >> $GITHUB_ENV
 
       - name: Check for changes
         id: check_changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_BASE_REF: ${{ env.GITHUB_BASE_REF }}
-          GITHUB_HEAD_REF: ${{ env.GITHUB_HEAD_REF }}
+          BASE_COMMIT: ${{ env.BASE_COMMIT }}
+          HEAD_COMMIT: ${{ env.HEAD_COMMIT }}
         run: node scripts/check-folder-changes.js
 
       - name: Use the output
