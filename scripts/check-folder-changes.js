@@ -5,7 +5,7 @@ const PATH_TO_CHECK = 'folder-to-commit';
 
 function checkFolderChanges() {
     try {
-        // Get the list of changed files between HEAD and previous commit
+        // Get the list of changed files between HEAD and previous commit. This workflow runs on master, so HEAD^ is the previous commit merged.
         const diffOutput = execSync('git diff --name-only HEAD^ HEAD').toString();
         
         // Split the output into array of changed files
