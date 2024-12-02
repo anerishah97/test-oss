@@ -49,19 +49,27 @@ function pushChanges(files) {
     }
 
     try {
+        console.log('Debug: Files to process:', files);  // Debug log for files array
+        
         const commitMsg = execSync('git log -1 --pretty=%B').toString().trim();
         const branchName = process.env.GITHUB_REF_NAME || 'main';
 
         const tempBranch = `temp-branch-${Date.now()}`;
+        console.log('Debug: Creating temp branch:', tempBranch);
         execSync('git checkout --orphan ' + tempBranch);
         
         execSync('git rm -rf .');
         
         files.forEach(file => {
-            const dir = path.dirname(file);
+            console.log('Debug: Processing file:', file);  // Debug log for each file object
+            console.log('Debug: File filename:', file.filename);  // Debug log for filename property
+            
+            const dir = path.dirname(file.filename);  // Use file.filename instead of file
+            console.log('Debug: Directory path:', dir);
+            
             execSync(`mkdir -p "${dir}"`);
-            execSync(`git show HEAD:"${file}" > "${file}"`);
-            execSync(`git add "${file}"`);
+            execSync(`git show HEAD:"${file.filename}" > "${file.filename}"`);
+            execSync(`git add "${file.filename}"`);
         });
 
         execSync(`git commit -m "${commitMsg}"`);
