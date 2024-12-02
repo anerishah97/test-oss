@@ -57,27 +57,41 @@ function pushChanges(files) {
         const commitMsg = execSync('git log -1 --pretty=%B').toString().trim();
         const branchName = process.env.GITHUB_REF_NAME || 'main';
 
-        // Fetch the repository first to ensure we have the files
+        // Fetch and checkout the correct commit
         console.log('Debug: Fetching repository');
         execSync('git fetch origin');
         execSync(`git checkout ${process.env.HEAD_COMMIT}`);
         
+        // Create a temporary directory to store files
+        const tempDir = `temp-${Date.now()}`;
+        console.log('Debug: Creating temp directory:', tempDir);
+        execSync(`mkdir -p ${tempDir}`);
+        
+        // Copy files to temp directory first
+        filteredFiles.forEach(file => {
+            console.log('Debug: Processing file:', file.filename);
+            const targetDir = path.join(tempDir, path.dirname(file.filename));
+            execSync(`mkdir -p "${targetDir}"`);
+            execSync(`cp "${file.filename}" "${path.join(tempDir, file.filename)}"`);
+        });
+        
+        // Create and switch to orphan branch
         const tempBranch = `temp-branch-${Date.now()}`;
         console.log('Debug: Creating temp branch:', tempBranch);
         execSync('git checkout --orphan ' + tempBranch);
-        
         execSync('git rm -rf .');
         
+        // Copy files back from temp directory
         filteredFiles.forEach(file => {
-            console.log('Debug: Processing file:', file.filename);
-            
             const dir = path.dirname(file.filename);
-            console.log('Debug: Directory path:', dir);
-            
+            console.log('Debug: Creating directory:', dir);
             execSync(`mkdir -p "${dir}"`);
-            execSync(`cp "${file.filename}" "${file.filename}"`);
+            execSync(`cp "${path.join(tempDir, file.filename)}" "${file.filename}"`);
             execSync(`git add "${file.filename}"`);
         });
+
+        // Clean up temp directory
+        execSync(`rm -rf ${tempDir}`);
 
         execSync(`git commit -m "${commitMsg}"`);
         
