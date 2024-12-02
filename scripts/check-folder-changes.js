@@ -4,22 +4,36 @@ const path = require('path');
 // Define the path constant
 const PATH_TO_CHECK = 'folder-to-commit';
 
-function getChangedFiles() {
+async function getChangedFiles(octokit, owner, repo, base, head) {
+    console.log('Debug: getChangedFiles called with:', { owner, repo, base, head });
     try {
-        const diffOutput = execSync('git diff --name-only origin/main...HEAD').toString();
-        const changedFiles = diffOutput.split('\n').filter(Boolean);
-        
-        // Filter only files from our target directory
-        const targetFiles = changedFiles.filter(file => 
-            file.startsWith(PATH_TO_CHECK + '/')
-        );
-        
-        console.log('Changed files in target directory:', targetFiles);
-        return targetFiles;
+        const response = await octokit.rest.repos.compareCommits({
+            owner,
+            repo,
+            base,
+            head,
+        });
+        console.log('Debug: Got response from GitHub API');
+        console.log('Debug: Number of files changed:', response.data.files.length);
+        return response.data.files;
     } catch (error) {
-        console.error('Error checking for changes:', error);
-        return [];
+        console.error('Debug: Error in getChangedFiles:', error);
+        throw error;
     }
+}
+
+function checkFolderChanges(files, folderPath) {
+    console.log('Debug: checkFolderChanges called with folderPath:', folderPath);
+    console.log('Debug: Number of files to check:', files.length);
+    
+    const hasChanges = files.some(file => {
+        const isInFolder = file.filename.startsWith(folderPath);
+        console.log('Debug: Checking file:', file.filename, 'isInFolder:', isInFolder);
+        return isInFolder;
+    });
+
+    console.log('Debug: Final result hasChanges:', hasChanges);
+    return hasChanges;
 }
 
 function pushChanges(files) {
@@ -73,4 +87,11 @@ if (hasChanges) {
 }
 
 // New way
+console.log('Debug: Starting change detection');
+console.log('Debug: GITHUB_OUTPUT =', process.env.GITHUB_OUTPUT);
+console.log('Debug: hasChanges =', hasChanges);
+
+// Write the output
+console.log('Debug: Setting output has_changes =', hasChanges);
 console.log(`has_changes=${hasChanges}` >> process.env.GITHUB_OUTPUT);
+console.log('Debug: Script completed');
