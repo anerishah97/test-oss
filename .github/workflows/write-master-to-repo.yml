@@ -36,8 +36,14 @@ jobs:
         id: git_info
         run: |
           echo "INFO: Determining base and head commits"
-          BASE_COMMIT=$(git log -2 --pretty=format:'%H' | tail -n 1)
-          HEAD_COMMIT=$(git log -1 --pretty=format:'%H')
+          # BASE_COMMIT=$(git log -2 --pretty=format:'%H' | tail -n 1)
+          # HEAD_COMMIT=$(git log -1 --pretty=format:'%H')
+          # Get the merge commit (already checked out by default)
+          HEAD_COMMIT=$(git rev-parse HEAD)
+
+          # Get the last commit on main before the merge
+          BASE_COMMIT=$(git rev-parse origin/main)
+
           echo "INFO: Base commit: $BASE_COMMIT"
           echo "INFO: Head commit: $HEAD_COMMIT"
           echo "BASE_COMMIT=$BASE_COMMIT" >> $GITHUB_ENV
