@@ -50,6 +50,9 @@ function pushChanges(files) {
 
     try {
         console.log('Debug: Files to process:', files);  // Debug log for files array
+        // Filter files to only include those starting with PATH_TO_CHECK
+        const filteredFiles = files.filter(file => file.filename.startsWith(PATH_TO_CHECK));
+        console.log('Debug: Files to process:', filteredFiles);  // Debug log for filtered files array
         
         const commitMsg = execSync('git log -1 --pretty=%B').toString().trim();
         const branchName = process.env.GITHUB_REF_NAME || 'main';
@@ -60,15 +63,14 @@ function pushChanges(files) {
         
         execSync('git rm -rf .');
         
-        files.forEach(file => {
-            console.log('Debug: Processing file:', file);  // Debug log for each file object
-            console.log('Debug: File filename:', file.filename);  // Debug log for filename property
+        filteredFiles.forEach(file => {
+            console.log('Debug: Processing file:', file.filename);
             
-            const dir = path.dirname(file.filename);  // Use file.filename instead of file
+            const dir = path.dirname(file.filename);
             console.log('Debug: Directory path:', dir);
             
             execSync(`mkdir -p "${dir}"`);
-            execSync(`git show HEAD:"${file.filename}" > "${file.filename}"`);
+            execSync(`cp "${file.filename}" "${file.filename}"`);
             execSync(`git add "${file.filename}"`);
         });
 
@@ -108,6 +110,8 @@ async function main() {
         process.env.BASE_COMMIT,
         process.env.HEAD_COMMIT
     );
+
+    console.log('Debug: Files:', files);    
     const hasChanges = files.length > 0;
     console.log('Has changes in path:', hasChanges);
 
