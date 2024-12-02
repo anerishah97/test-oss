@@ -83,6 +83,12 @@ async function main() {
         auth: process.env.GITHUB_TOKEN
     });
 
+    // Debugging: Log environment variables
+    console.log('Debug: Environment Variables:', {
+        GITHUB_BASE_REF: process.env.GITHUB_BASE_REF,
+        GITHUB_HEAD_REF: process.env.GITHUB_HEAD_REF
+    });
+
     // Parse repository information
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
     console.log('Debug: Repository info:', { owner, repo });
