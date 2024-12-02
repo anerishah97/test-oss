@@ -21,6 +21,9 @@ jobs:
           # and to ensure all branches and commit history are available.
           fetch-depth: 0
 
+      - name: Install dependencies
+        run: npm install @octokit/rest
+
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.8.0
         with:
@@ -33,6 +36,8 @@ jobs:
 
       - name: Check for changes
         id: check_changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/check-folder-changes.js
 
       - name: Use the output
