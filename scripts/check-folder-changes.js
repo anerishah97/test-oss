@@ -1,4 +1,4 @@
-const { execSync } = require('child_process');
+import { execSync } from 'child_process';
 
 // Define the path constant
 const PATH_TO_CHECK = 'folder-to-commit';
