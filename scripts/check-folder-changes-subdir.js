@@ -68,17 +68,18 @@ function pushChanges(files) {
             execSync(`cp "${file.filename}" "${path.join(tempDir, file.filename)}"`);
         });
         
-        // Create and switch to orphan branch
+        // Create and switch to a new branch from the current HEAD
         const tempBranch = `temp-branch-${Date.now()}`;
         console.log('Debug: Creating temp branch:', tempBranch);
-        execSync('git checkout --orphan ' + tempBranch);
-        
-
+        execSync(`git checkout -b ${tempBranch}`);
 
         execSync(`git config user.name "${authorName}"`);
         execSync(`git config user.email "${authorEmail}"`);
         
-        execSync('git rm -rf .');
+        // Remove only the files that are being updated
+        filteredFiles.forEach(file => {
+            execSync(`git rm --cached "${file.filename}"`);
+        });
         
         // Copy files back from temp directory
         filteredFiles.forEach(file => {
