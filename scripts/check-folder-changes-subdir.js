@@ -74,7 +74,7 @@ function pushChanges() {
 
     // Proceed with commit directly
     try {
-      execSync(`git commit -m "${commitMsg}"`);
+      execSync(`git commit -m -f --allow-empty "${commitMsg}"`);
     } catch (error) {
       console.error('Commit failed:', error.stdout?.toString());
       throw error;
