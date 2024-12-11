@@ -60,13 +60,10 @@ function pushChanges(files) {
         console.log('Debug: Creating temp directory:', tempDir);
         execSync(`mkdir -p ${tempDir}`);
         
-        // Copy files to temp directory first
-        filteredFiles.forEach(file => {
-            console.log('Debug: Processing file:', file.filename);
-            const targetDir = path.join(tempDir, path.dirname(file.filename));
-            execSync(`mkdir -p "${targetDir}"`);
-            execSync(`cp "${file.filename}" "${path.join(tempDir, file.filename)}"`);
-        });
+        // Copy all files from the specified folder to the temp directory
+        const sourceDir = path.join(__dirname, PATH_TO_CHECK);
+        console.log('Debug: Copying all files from source directory:', sourceDir);
+        execSync(`cp -r "${sourceDir}/." "${tempDir}/"`);
         
         // Create and switch to orphan branch
         const tempBranch = `temp-branch-${Date.now()}`;
