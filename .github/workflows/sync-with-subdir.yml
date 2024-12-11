@@ -51,7 +51,7 @@ jobs:
         id: check_changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/check-folder-changes.js
+        run: node scripts/check-folder-changes-subdir.js
       - name: Use the output
         if: steps.check_changes.outputs.has_changes == 'true'
         run: echo "Changes were detected!"
