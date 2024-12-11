@@ -66,22 +66,14 @@ function pushChanges() {
       execSync(`mkdir -p "${dir}"`);
     });
 
-    // Add files to git
+    // Add files to git and commit without checking status
     allFiles.forEach((file) => {
       console.log('Debug: Adding file:', file);
       execSync(`git add "${file}"`);
     });
 
-    // Add error checking and logging before commit
+    // Proceed with commit directly
     try {
-      // Check if there are files to commit
-      const status = execSync('git status --porcelain').toString();
-      if (!status.trim()) {
-        console.log('No files to commit');
-        return false;
-      }
-
-      // If there are files, proceed with commit
       execSync(`git commit -m "${commitMsg}"`);
     } catch (error) {
       console.error('Commit failed:', error.stdout?.toString());
