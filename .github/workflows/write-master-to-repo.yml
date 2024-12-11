@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 'pr/**'
 
 jobs:
   sync-to-repo:
@@ -19,10 +20,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install dependencies
-        run: npm install
+      - name: Check for changes in folder
+        id: folder_changes
+        run: node scripts/check-folder-changes.js
 
       - name: Install SSH key
+        if: steps.folder_changes.outputs.has_changes == 'true'
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.DEPLOY_KEY }}
@@ -32,27 +35,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-      - name: Determine base and head commits
-        id: git_info
+      - name: Push to destination repository
         run: |
-          echo "INFO: Determining base and head commits"
-          # Get the current commit
-          HEAD_COMMIT=$(git rev-parse HEAD)
-          
-          # Get the parent commit of the current commit
-          BASE_COMMIT=$(git rev-parse HEAD^)
-          
-          echo "INFO: Base commit: $BASE_COMMIT"
-          echo "INFO: Head commit: $HEAD_COMMIT"
-          echo "BASE_COMMIT=$BASE_COMMIT" >> $GITHUB_ENV
-          echo "HEAD_COMMIT=$HEAD_COMMIT" >> $GITHUB_ENV
-
-      - name: Check for changes
-        id: check_changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/check-folder-changes.js
-
-      - name: Use the output
-        if: steps.check_changes.outputs.has_changes == 'true'
-        run: echo "Changes were detected!"
+          git remote add destination git@github.com:anerishah97/test-oss-destination.git
+          git push destination ${GITHUB_REF_NAME}:${GITHUB_REF_NAME} --force
