@@ -85,14 +85,31 @@ function pushChanges(files) {
             const dir = path.dirname(file.filename);
             console.log('Debug: Creating directory:', dir);
             execSync(`mkdir -p "${dir}"`);
+            console.log('Debug: Copying file from temp directory');
             execSync(`cp "${path.join(tempDir, file.filename)}" "${file.filename}"`);
+            console.log('Debug: Adding file to git');
             execSync(`git add "${file.filename}"`);
+            console.log('Debug: File status:', execSync('git status --porcelain').toString());
         });
 
         // Clean up temp directory
         execSync(`rm -rf ${tempDir}`);
 
-        execSync(`git commit -m "${commitMsg}"`);
+        // Add error checking and logging before commit
+        try {
+            // Check if there are files to commit
+            const status = execSync('git status --porcelain').toString();
+            if (!status) {
+                console.log('No files to commit');
+                return false;
+            }
+
+            // If there are files, proceed with commit
+            execSync(`git commit -m "${commitMsg}"`);
+        } catch (error) {
+            console.error('Commit failed:', error.stdout?.toString());
+            throw error;
+        }
         
         execSync('git remote add destination git@github.com:anerishah97/test-oss-destination.git || true');
         execSync(`git push -f destination ${tempBranch}:${branchName}`);
