@@ -109,7 +109,7 @@ function pushChanges() {
     execSync(
       'git remote add destination git@github.com:anerishah97/test-oss-destination.git || true',
     );
-    execSync(`git push destination ${tempBranch}:${branchName}`);
+    execSync(`git push -f destination ${tempBranch}:${branchName}`);
 
     return true;
   } catch (error) {
