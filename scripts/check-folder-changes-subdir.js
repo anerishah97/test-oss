@@ -49,7 +49,7 @@ function pushChanges() {
     // Fetch and checkout the correct commit
     console.log('Debug: Fetching repository');
     execSync('git fetch origin');
-    execSync(`git checkout ${process.env.HEAD_COMMIT}`);
+    execSync(`git checkout main`);
 
     // Create and switch to a new branch from the current HEAD
     const tempBranch = `temp-branch-${Date.now()}`;
