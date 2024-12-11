@@ -59,6 +59,10 @@ function pushChanges() {
     execSync(`git config user.name "${authorName}"`);
     execSync(`git config user.email "${authorEmail}"`);
 
+    // Get the repository root directory
+    const repoRoot = execSync('git rev-parse --show-toplevel').toString().trim();
+    console.log('Debug: Repository root:', repoRoot);
+
     // Create all necessary directories at once
     const uniqueDirs = [...new Set(allFiles.map((file) => path.dirname(file)))];
     uniqueDirs.forEach((dir) => {
@@ -66,15 +70,22 @@ function pushChanges() {
       execSync(`mkdir -p "${dir}"`);
     });
 
-    // Add files to git and commit without checking status
+    // Copy the actual files from the source location
+    allFiles.forEach((file) => {
+      const sourceFile = path.join(repoRoot, file);
+      console.log('Debug: Copying file from:', sourceFile, 'to:', file);
+      execSync(`cp "${sourceFile}" "${file}"`);
+    });
+
+    // Now add the files to git
     allFiles.forEach((file) => {
       console.log('Debug: Adding file:', file);
       execSync(`git add "${file}"`);
     });
 
-        // Print git status before commit
-        console.log('Debug: Git status before commit:');
-        console.log(execSync('git status').toString());
+    // Print git status before commit
+    console.log('Debug: Git status before commit:');
+    console.log(execSync('git status').toString());
     
 
     // Proceed with commit directly
