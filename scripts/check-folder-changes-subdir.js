@@ -43,6 +43,13 @@ function pushChanges(files) {
         const commitMsg = execSync('git log -1 --pretty=%B').toString().trim();
         const branchName = process.env.GITHUB_REF_NAME || 'main';
 
+        // Set up Git configuration
+        const authorName = execSync('git log -1 --pretty=format:"%an"').toString().trim();
+        const authorEmail = execSync('git log -1 --pretty=format:"%ae"').toString().trim();
+
+        console.log('Debug: Author name:', authorName);
+        console.log('Debug: Author email:', authorEmail);
+
         // Fetch and checkout the correct commit
         console.log('Debug: Fetching repository');
         execSync('git fetch origin');
@@ -66,12 +73,7 @@ function pushChanges(files) {
         console.log('Debug: Creating temp branch:', tempBranch);
         execSync('git checkout --orphan ' + tempBranch);
         
-        // Set up Git configuration
-        const authorName = execSync('git log -1 --pretty=format:"%an"').toString().trim();
-        const authorEmail = execSync('git log -1 --pretty=format:"%ae"').toString().trim();
 
-        console.log('Debug: Author name:', authorName);
-        console.log('Debug: Author email:', authorEmail);
 
         execSync(`git config user.name "${authorName}"`);
         execSync(`git config user.email "${authorEmail}"`);
