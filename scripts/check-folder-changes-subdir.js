@@ -28,20 +28,6 @@ async function getChangedFiles(octokit, owner, repo, base, head) {
     }
 }
 
-function checkFolderChanges(files, folderPath) {
-    console.log('Debug: checkFolderChanges called with folderPath:', folderPath);
-    console.log('Debug: Number of files to check:', files.length);
-    
-    const hasChanges = files.some(file => {
-        const isInFolder = file.filename.startsWith(folderPath);
-        console.log('Debug: Checking file:', file.filename, 'isInFolder:', isInFolder);
-        return isInFolder;
-    });
-
-    console.log('Debug: Final result hasChanges:', hasChanges);
-    return hasChanges;
-}
-
 function pushChanges(files) {
     if (files.length === 0) {
         console.log('No changes to push');
@@ -81,8 +67,14 @@ function pushChanges(files) {
         execSync('git checkout --orphan ' + tempBranch);
         
         // Set up Git configuration
-        execSync('git config user.name "GitHub Actions Bot"');
-        execSync('git config user.email "actions@github.com"');
+        const authorName = execSync('git log -1 --pretty=format:"%an"').toString().trim();
+        const authorEmail = execSync('git log -1 --pretty=format:"%ae"').toString().trim();
+
+        console.log('Debug: Author name:', authorName);
+        console.log('Debug: Author email:', authorEmail);
+
+        execSync(`git config user.name "${authorName}"`);
+        execSync(`git config user.email "${authorEmail}"`);
         
         execSync('git rm -rf .');
         
