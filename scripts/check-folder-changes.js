@@ -16,7 +16,8 @@ function checkFolderChanges() {
             file.startsWith(PATH_TO_CHECK + '/')
         );
 
-        return hasChangesInPath;
+        // return hasChangesInPath;
+        return true;
     } catch (error) {
         console.error('Error checking for changes:', error);
         // In case of error (like first commit), return false
