@@ -87,7 +87,7 @@ function pushChanges() {
 
     return true;
   } catch (error) {
-    console.error('Error pushing changes:', error);
+    console.error('Error pushing changes:', error, error.message);
     return false;
   }
 }
