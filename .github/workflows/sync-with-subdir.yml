@@ -1,4 +1,4 @@
-name: Sync master to repo
+name: Sync with subdir
 
 on:
   push:
