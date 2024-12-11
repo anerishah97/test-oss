@@ -63,19 +63,29 @@ function pushChanges() {
     const repoRoot = execSync('git rev-parse --show-toplevel').toString().trim();
     console.log('Debug: Repository root:', repoRoot);
 
-    // Create all necessary directories at once
+    // Create a temporary directory for the operation
+    const tempDir = `temp-${Date.now()}`;
+    console.log('Debug: Creating temp directory:', tempDir);
+    execSync(`mkdir -p "${tempDir}"`);
+
+    // Create all necessary directories in the temp location
     const uniqueDirs = [...new Set(allFiles.map((file) => path.dirname(file)))];
     uniqueDirs.forEach((dir) => {
-      console.log('Debug: Creating directory:', dir);
-      execSync(`mkdir -p "${dir}"`);
+      console.log('Debug: Creating directory:', path.join(tempDir, dir));
+      execSync(`mkdir -p "${path.join(tempDir, dir)}"`);
     });
 
-    // Copy the actual files from the source location
+    // Copy the actual files from the source location to temp directory
     allFiles.forEach((file) => {
       const sourceFile = path.join(repoRoot, file);
-      console.log('Debug: Copying file from:', sourceFile, 'to:', file);
-      execSync(`cp "${sourceFile}" "${file}"`);
+      const destFile = path.join(tempDir, file);
+      console.log('Debug: Copying file from:', sourceFile, 'to:', destFile);
+      execSync(`cp "${sourceFile}" "${destFile}"`);
     });
+
+    // Move the files from temp to final location
+    execSync(`cp -r ${tempDir}/* ./`);
+    execSync(`rm -rf ${tempDir}`);
 
     // Now add the files to git
     allFiles.forEach((file) => {
