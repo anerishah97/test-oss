@@ -52,32 +52,10 @@ function pushChanges(files) {
         const authorName = execSync('git log -1 --pretty=format:"%an"').toString().trim();
         const authorEmail = execSync('git log -1 --pretty=format:"%ae"').toString().trim();
 
-        console.log('Debug: Author name:', authorName);
-        console.log('Debug: Author email:', authorEmail);
-
         // Fetch and checkout the correct commit
         console.log('Debug: Fetching repository');
         execSync('git fetch origin');
         execSync(`git checkout ${process.env.HEAD_COMMIT}`);
-        
-        // Create a temporary directory
-        const tempDir = `temp-${Date.now()}`;
-        console.log('Debug: Creating temp directory:', tempDir);
-        execSync(`mkdir -p ${tempDir}`);
-        
-        // Create all necessary directories at once
-        const uniqueDirs = [...new Set(filteredFiles.map(file => path.dirname(file.filename)))];
-        uniqueDirs.forEach(dir => {
-            console.log('Debug: Creating directory:', dir);
-            execSync(`mkdir -p "${dir}"`);
-            execSync(`mkdir -p "${path.join(tempDir, dir)}"`);
-        });
-        
-        // Copy files to temp directory
-        filteredFiles.forEach(file => {
-            console.log('Debug: Processing file:', file.filename);
-            execSync(`cp "${file.filename}" "${path.join(tempDir, file.filename)}"`);
-        });
         
         // Create and switch to a new branch from the current HEAD
         const tempBranch = `temp-branch-${Date.now()}`;
@@ -87,28 +65,24 @@ function pushChanges(files) {
         execSync(`git config user.name "${authorName}"`);
         execSync(`git config user.email "${authorEmail}"`);
         
-        // Remove files from git tracking
-        filteredFiles.forEach(file => {
-            execSync(`git rm --cached "${file.filename}"`);
+        // Create all necessary directories at once
+        const uniqueDirs = [...new Set(filteredFiles.map(file => path.dirname(file.filename)))];
+        uniqueDirs.forEach(dir => {
+            console.log('Debug: Creating directory:', dir);
+            execSync(`mkdir -p "${dir}"`);
         });
         
-        // Copy files back from temp directory and add to git
+        // Add files to git
         filteredFiles.forEach(file => {
-            console.log('Debug: Copying and adding file:', file.filename);
-            execSync(`cp "${path.join(tempDir, file.filename)}" "${file.filename}"`);
-            console.log('Debug: File status:', execSync('git status --porcelain').toString());
+            console.log('Debug: Adding file:', file.filename);
             execSync(`git add "${file.filename}"`);
-            console.log('Debug, adding file to git:', file.filename);
         });
-
-        // Clean up temp directory
-        execSync(`rm -rf ${tempDir}`);
 
         // Add error checking and logging before commit
         try {
             // Check if there are files to commit
             const status = execSync('git status --porcelain').toString();
-            if (!status) {
+            if (!status.trim()) {
                 console.log('No files to commit');
                 return false;
             }
