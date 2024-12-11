@@ -72,6 +72,11 @@ function pushChanges() {
       execSync(`git add "${file}"`);
     });
 
+        // Print git status before commit
+        console.log('Debug: Git status before commit:');
+        console.log(execSync('git status').toString());
+    
+
     // Proceed with commit directly
     try {
       execSync(`git commit --allow-empty -m "${commitMsg}"`);
